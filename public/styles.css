@@ -1,0 +1,80 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-weight: 300;
+}
+
+
+.container {
+    margin: 10% auto;
+    padding: 80px 0;
+    text-align: center;
+    background-color: #888;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 350px;
+  margin: 40px auto;
+  padding: 24px 16px;
+  background: #f8f8f8;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+.form input {
+  width: 100%;
+  max-width: 300px;
+  margin: 0;
+  display: block;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fff;
+}
+.form input:focus {
+  border: 1px solid #6bb7be;
+  outline: none;
+}
+.form button {
+  margin-top: 8px;
+  width: 100%;
+  max-width: 300px;
+  height: 40px;
+  background: #6bb7be;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.form button:hover {
+  background: #4e9ca0;
+}
+button{
+  background-color: cadetblue;
+  height: 20px;
+  width: 20px;
+  /* legacy button style, overridden by .form button */
+}
+
+input{
+  margin-left: 20%;
+  margin-right: 20%;
+  /* legacy input style, overridden by .form input */
+}
+
+.task-checkbox {
+  width: 3px;
+  height: 3px;
+  cursor: pointer;
+  accent-color: #6bb7be; 
+  margin-right: 3px;
+}
