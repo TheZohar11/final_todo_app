@@ -8,16 +8,17 @@ function MyInput({
   value,
   onChangeText,
   secureTextEntry,
+  maxwidth,
 }) {
   return (
     <TextInput
       placeholder={placeholder}
-      style={styles.input}
+      style={[styles.input, { maxWidth: maxwidth || 300 }]}
       keyboardType={keyboardType}
       autoCapitalize={autoCapitalize}
       value={value}
       onChangeText={onChangeText}
-      secureTextEntry={secureTextEntry}
+      secureTextEntry={Boolean(secureTextEntry)}
     />
   );
 }

@@ -34,6 +34,16 @@ try {
 } catch (e) {
   console.log(e);
 }
+// extract the token from the header
+function getTokenFromHeader(req) {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.substring(7);
+  }
+
+  return null;
+}
 
 //login route
 app.post("/users/login", async (req, res) => {
@@ -41,12 +51,16 @@ app.post("/users/login", async (req, res) => {
   try {
     const user = await usersCollection.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
-      //res.status(200).json({ message: 'login successfully', userId: user._id })
+      let token = user.token;
+      if (!token) {
+        token = uuidv4();
+        await usersCollection.updateOne({ email }, { $set: { token } });
+      }
       res.status(200).json({
         message: "login successfully",
         userId: user.ID,
-        token: user.token,
-      }); // ? maybe this line instead of
+        token: token,
+      });
     } else {
       res.status(401).json({ error: "invalid email or password" });
     }
@@ -68,6 +82,7 @@ app.post("/users", async (req, res) => {
       password: hashedPassword,
       ID: count,
       uuid: uuidv4(),
+      token: uuidv4(),
     };
     const result = await usersCollection.insertOne(userObj);
     await countersCollection.updateOne(
@@ -135,29 +150,19 @@ app.get("/users", async (req, res) => {
 
 // reading all tasks for a specific user (get home data)
 app.get("/tasks", async (req, res) => {
-  const userId = req.query.userId;
-  const token = req.query.token;
-
   try {
-    let query = {};
+    const userToken = getTokenFromHeader(req);
 
-    if (token) {
-      // Find user by token
-      const user = await usersCollection.findOne({ token });
-      if (!user) {
-        return res.status(401).json({ error: "Invalid token" });
-      }
-      query.userId = user.ID;
-    } else if (userId) {
-      // use userId if no token is provided
-      query.userId = parseInt(userId);
-    } else {
-      return res
-        .status(400)
-        .json({ error: "Either token or userId must be provided" });
+    if (!userToken) {
+      return res.status(401).json({ error: "Authorization token required" });
     }
 
-    const tasks = await tasksCollection.find(query).toArray();
+    const user = await usersCollection.findOne({ token: userToken });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    const tasks = await tasksCollection.find({ userId: user.ID }).toArray();
     res.send(tasks);
   } catch (e) {
     res.status(500).send(e);
@@ -178,11 +183,44 @@ app.patch("/users/:id", async (req, res) => {
 
 //updating a task
 app.patch("/tasks/:id", async (req, res) => {
-  const updates = Object.keys(req.body);
+  // Get token from Authorization header
+  const token = getTokenFromHeader(req);
+
+  if (!token) {
+    return res.status(401).json({ error: "Authorization token required" });
+  }
+
   try {
-    const task = await tasksCollection.findById(req.params.id);
-    updates.forEach((update) => (task[update] = req.body[update]));
-    await user.save();
+    // Verify user by token
+    const user = await usersCollection.findOne({ token });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    // Find the task
+    const task = await tasksCollection.findOne({
+      _id: new ObjectId(req.params.id),
+    });
+
+    if (!task) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    // Verify task belongs to this user
+    if (task.userId !== user.ID) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to update this task" });
+    }
+
+    // Toggle completion status
+    task.completed = !task.completed;
+    await tasksCollection.replaceOne(
+      { _id: new ObjectId(req.params.id) },
+      task
+    );
+
+    res.status(200).json({ message: "Task updated successfully", task });
   } catch (e) {
     res.status(400).send(e);
   }
