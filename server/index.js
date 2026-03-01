@@ -6,6 +6,7 @@ const { MongoClient, ObjectId } = require("mongodb");
 const app = express();
 
 const cors = require("cors");
+const { getTokenFromHeader } = require("./Logic/getTokenFromHeader");
 app.use(cors());
 
 const PORT = 5000;
@@ -33,16 +34,6 @@ try {
   connectDB();
 } catch (e) {
   console.log(e);
-}
-// extract the token from the header
-function getTokenFromHeader(req) {
-  const authHeader = req.headers.authorization;
-
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    return authHeader.substring(7);
-  }
-
-  return null;
 }
 
 //login route
@@ -229,6 +220,23 @@ app.patch("/tasks/:id", async (req, res) => {
 //deleting a task (temporary- not completed yet)
 app.delete("/tasks/:id", async (req, res) => {
   try {
+    const token = getTokenFromHeader(req);
+    if (!token) {
+      return res.status(401).json({ error: "Authorization token required" });
+    }
+    const user = await usersCollection.findOne({ token });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+    const task = await tasksCollection.findOne({
+      _id: new ObjectId(req.params.id),
+    });
+    if (task.userId !== user.ID) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to delete this task" });
+    }
+
     const result = await tasksCollection.deleteOne({
       _id: new ObjectId(req.params.id),
     });

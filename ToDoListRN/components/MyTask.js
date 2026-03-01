@@ -26,7 +26,7 @@ function MyTask({
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Send token in Authorization header
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ completed: newCompleted }),
       });
@@ -42,8 +42,24 @@ function MyTask({
       setIsUpdating(false);
     }
   }
-  function handleDeleteTask() {
+  async function handleDeleteTask() {
     console.log("delete task");
+    try {
+      const response = await fetch(`http://10.0.2.2:5000/tasks/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        await onTaskUpdate();
+      } else {
+        alert("Failed to delete task.");
+      }
+    } catch (error) {
+      alert("Error deleting task:", error);
+    }
   }
   return (
     <View style={styles.taskContainer}>
