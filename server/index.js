@@ -88,7 +88,7 @@ app.post("/users", async (req, res) => {
     await countersCollection.updateOne(
       { _id: "userCount" },
       { $set: { count: count + 1 } },
-      { upsert: true }
+      { upsert: true },
     );
     if (!result) {
       res.status(400);
@@ -104,10 +104,10 @@ app.post("/users", async (req, res) => {
 //creating a task
 app.post("/tasks", async (req, res) => {
   const { description, completed } = req.body;
-  const token = req.query.token;
+  const token = getTokenFromHeader(req);
 
   if (!token) {
-    return res.status(401).json({ error: "Token is required" });
+    return res.status(401).json({ error: "Authorization token required" });
   }
 
   // Validate required fields
@@ -217,7 +217,7 @@ app.patch("/tasks/:id", async (req, res) => {
     task.completed = !task.completed;
     await tasksCollection.replaceOne(
       { _id: new ObjectId(req.params.id) },
-      task
+      task,
     );
 
     res.status(200).json({ message: "Task updated successfully", task });

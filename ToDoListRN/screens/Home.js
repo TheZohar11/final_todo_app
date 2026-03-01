@@ -49,7 +49,9 @@ function Home({ route }) {
           />
           <MyButton
             title={"Add"}
-            onPress={() => handleAddTask(newTask, setNewTask, setTasks, tasks)}
+            onPress={() =>
+              handleAddTask(newTask, setNewTask, setTasks, setLoading, userData)
+            }
             maxwidth={100}
             padding={4}
           />
