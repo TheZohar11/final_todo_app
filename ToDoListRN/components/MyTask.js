@@ -5,19 +5,28 @@ import React from "react";
 //<ion-icon name="alarm-outline"></ion-icon>
 //<ion-icon name="backspace-outline"></ion-icon>
 
-function MyTask({ description, completed, id, onTaskUpdate, setIsUpdating, token }) {
+function MyTask({
+  description,
+  completed,
+  id,
+  onTaskUpdate,
+  setIsUpdating,
+  token,
+}) {
   // Ensure completed is always a proper boolean
-  const isCompleted = Boolean(completed === true || completed === "true" || completed === 1);
-  
+  const isCompleted = Boolean(
+    completed === true || completed === "true" || completed === 1,
+  );
+
   async function handleCompleteTask() {
     try {
       setIsUpdating(true);
       const newCompleted = !isCompleted;
-      const response = await fetch(`http://localhost:5000/tasks/${id}`, {
+      const response = await fetch(`http://10.0.2.2:5000/tasks/${id}`, {
         method: "PATCH",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`  // Send token in Authorization header
+          Authorization: `Bearer ${token}`, // Send token in Authorization header
         },
         body: JSON.stringify({ completed: newCompleted }),
       });

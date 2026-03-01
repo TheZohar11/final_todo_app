@@ -9,7 +9,7 @@ function Login({ navigation }) {
 
   async function handleLogin() {
     try {
-      const response = await fetch("http://localhost:5000/users/login", {
+      const response = await fetch("http://10.0.2.2:5000/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
