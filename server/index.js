@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const validator = require("validator");
 const { v4: uuidv4 } = require("uuid");
 const { MongoClient, ObjectId } = require("mongodb");
 const app = express();
@@ -39,6 +40,14 @@ try {
 //login route
 app.post("/users/login", async (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required" });
+  }
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ error: "Invalid email format" });
+  }
+
   try {
     const user = await usersCollection.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
@@ -63,6 +72,19 @@ app.post("/users/login", async (req, res) => {
 //creating a user (sign up)
 app.post("/users", async (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required" });
+  }
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ error: "Invalid email format" });
+  }
+  if (password.length < 6) {
+    return res
+      .status(400)
+      .json({ error: "Password must be at least 6 characters" });
+  }
+
   try {
     let counterDoc = await countersCollection.findOne();
     let count = counterDoc ? counterDoc.count : 1;
@@ -90,7 +112,7 @@ app.post("/users", async (req, res) => {
       token: userObj.token,
     });
   } catch (e) {
-    res.status(500).json({ error: "error creating thr user" });
+    res.status(500).json({ error: "error creating the user" });
   }
 });
 
