@@ -84,9 +84,11 @@ app.post("/users", async (req, res) => {
     if (!result) {
       res.status(400);
     }
-    res
-      .status(201)
-      .json({ message: "created a new user", userId: result.insertedId });
+    res.status(201).json({
+      message: "created a new user",
+      userId: result.insertedId,
+      token: userObj.token,
+    });
   } catch (e) {
     res.status(500).json({ error: "error creating thr user" });
   }
