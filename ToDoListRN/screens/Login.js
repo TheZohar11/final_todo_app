@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import MyButton from "../components/MyButton";
 import MyInput from "../components/MyInput";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function Login({ navigation }) {
   const [email, setEmail] = useState("");
@@ -19,6 +20,8 @@ function Login({ navigation }) {
         alert(data?.error || "Login failed");
         return;
       }
+      
+      await AsyncStorage.setItem("userData", JSON.stringify(data));
       navigation.navigate("Home", { userData: data });
     } catch (error) {
       console.error("Login error:", error);
