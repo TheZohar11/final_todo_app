@@ -13,25 +13,35 @@ import MyTask from "../components/MyTask";
 import { Ionicons } from "@expo/vector-icons";
 import { getTasks } from "../functions/getTasks";
 import { handleAddTask } from "../functions/handleAddTask";
+import { loadUserData } from "../functions/loadUserData";
 //<ion-icon name="cafe-outline"></ion-icon>
 
 function Home({ route }) {
-  const { userData } = route.params || {};
+  const [userData, setUserData] = useState(route.params?.userData || null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
+    (async () => {
+      if (!userData) {
+        const data = await loadUserData();
+        if (data) setUserData(data);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
     if (userData?.token) {
       getTasks(userData, setTasks, setLoading);
     }
-  }, [userData?.token]);
+  }, [userData]);
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <Text>Loading tasks...</Text>
+        <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
   }
