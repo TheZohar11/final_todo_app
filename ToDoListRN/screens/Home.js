@@ -5,8 +5,9 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import MyButton from "../components/MyButton";
 import MyInput from "../components/MyInput";
 import MyTask from "../components/MyTask";
@@ -16,7 +17,7 @@ import { handleAddTask } from "../functions/handleAddTask";
 import { loadUserData } from "../functions/loadUserData";
 //<ion-icon name="cafe-outline"></ion-icon>
 
-function Home({ route }) {
+function Home({ route, navigation }) {
   const [userData, setUserData] = useState(route.params?.userData || null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -107,6 +108,21 @@ function Home({ route }) {
           </>
         )}
       </View>
+      <View style={{ width: "100%", alignItems: "center" }}>
+        <MyButton
+          style={styles.logoutButton}
+          title={"Logout"}
+          onPress={async () => {
+            await AsyncStorage.removeItem("userData");
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Landing" }],
+            });
+          }}
+          maxwidth={100}
+          padding={4}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -144,6 +160,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#aaaaaa",
+  },
+  logoutButton: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    shadowColor: "#000",
   },
 });
 
