@@ -1,3 +1,5 @@
+import { API_URL } from "../config";
+
 export async function getTasks(userData, setTasks, setLoading) {
   try {
     const token = userData?.token;
@@ -5,7 +7,7 @@ export async function getTasks(userData, setTasks, setLoading) {
       alert("No token available");
       return;
     }
-    const response = await fetch(`http://10.0.2.2:5000/tasks`, {
+    const response = await fetch(`${API_URL}/tasks`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

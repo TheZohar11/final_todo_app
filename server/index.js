@@ -10,7 +10,7 @@ const cors = require("cors");
 const { getTokenFromHeader } = require("./Logic/getTokenFromHeader");
 app.use(cors());
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const uri = process.env.MONGODB_URI;
 if (!uri) {
   throw new Error("MONGODB_URI is not set in .env");

@@ -1,4 +1,5 @@
 import { getTasks } from "./getTasks";
+import { API_URL } from "../config";
 
 export async function handleAddTask(
   newTask,
@@ -15,7 +16,7 @@ export async function handleAddTask(
       return;
     }
 
-    const response = await fetch(`http://10.0.2.2:5000/tasks`, {
+    const response = await fetch(`${API_URL}/tasks`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

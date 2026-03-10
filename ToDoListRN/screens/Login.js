@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import MyButton from "../components/MyButton";
 import MyInput from "../components/MyInput";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "../config";
 
 function Login({ navigation }) {
   const [email, setEmail] = useState("");
@@ -10,7 +11,7 @@ function Login({ navigation }) {
 
   async function handleLogin() {
     try {
-      const response = await fetch("http://10.0.2.2:5000/users/login", {
+      const response = await fetch(`${API_URL}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

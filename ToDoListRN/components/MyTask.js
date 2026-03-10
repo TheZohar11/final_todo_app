@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import { API_URL } from "../config";
 // <ion-icon name="checkmark-done-outline"></ion-icon>
 //<ion-icon name="alarm-outline"></ion-icon>
 //<ion-icon name="backspace-outline"></ion-icon>
@@ -22,7 +23,7 @@ function MyTask({
     try {
       setIsUpdating(true);
       const newCompleted = !isCompleted;
-      const response = await fetch(`http://10.0.2.2:5000/tasks/${id}`, {
+      const response = await fetch(`${API_URL}/tasks/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +46,7 @@ function MyTask({
   async function handleDeleteTask() {
     console.log("delete task");
     try {
-      const response = await fetch(`http://10.0.2.2:5000/tasks/${id}`, {
+      const response = await fetch(`${API_URL}/tasks/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
