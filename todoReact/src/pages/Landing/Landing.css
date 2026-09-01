@@ -1,0 +1,21 @@
+.divi {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.link {
+  color: #f1f1f1;
+  font-size: large;
+  text-decoration: none;
+  margin: 8px;
+  padding: 16px;
+  background-color: #444;
+  border: 6px solid #d1d1d1;
+  border-radius: 8px;
+}
+
+.link:hover {
+  background-color: #333;
+}
