@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Input from "../../components/Input/Input";
 import TextLarge from "../../components/TextLarge/TextLarge";
 import "./Login.css";
@@ -37,8 +37,6 @@ export default function Login() {
         type="password"
       />
       <Button onClick={handleOnClick} text="Log In" />
-      <Link to="/">Landing</Link>
-      <Link to="/Home">Home</Link>
     </div>
   );
 }
