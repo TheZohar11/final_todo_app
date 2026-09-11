@@ -59,7 +59,7 @@ function handleOnClick(e) {
   navigate("/Home");
 }
 // . . .
-<Button onClick={handleOnClick} text="Log In" />
+<Button onClick={handleOnClick} text="Log In" />;
 ```
 
 ## Input Component
@@ -92,9 +92,9 @@ export default function Input({ placeholder, value, onChange, type = "text" }) {
 
 To make the input functional, the parent component must store the data and provide a way to update it.
 
-* **useState**: Initializes a state variable (`email`) and a function to update it (`setEmail`).
-* **Handler Function**: `handleOnChange` receives the browser event (`e`) and extracts the new text string via `e.target.value`, passing it to `setEmail`.
-* **Binding**: The state and the handler are passed into our custom `<Input/>` component via props.
+- **useState**: Initializes a state variable (`email`) and a function to update it (`setEmail`).
+- **Handler Function**: `handleOnChange` receives the browser event (`e`) and extracts the new text string via `e.target.value`, passing it to `setEmail`.
+- **Binding**: The state and the handler are passed into our custom `<Input/>` component via props.
 
 ```jsx
 import { useState } from "react";
@@ -128,8 +128,8 @@ export default function Login() {
 
 When styling components, it is best practice to handle inner element sizing on the component itself, while handling the layout and spacing in the parent container.
 
-* **The Input**: Avoid using `display: flex` directly on an HTML `<input>`. Instead, use standard box model properties like `padding`, `width: 100%`, and `box-sizing: border-box`. This guarantees the input fills its space reliably.
-* **The Container**: The parent wrapper uses Flexbox to align elements. Applying the `gap` property ensures clean, even spacing between all children (text, input, and links) without needing to apply manual margins to each element.
+- **The Input**: Avoid using `display: flex` directly on an HTML `<input>`. Instead, use standard box model properties like `padding`, `width: 100%`, and `box-sizing: border-box`. This guarantees the input fills its space reliably.
+- **The Container**: The parent wrapper uses Flexbox to align elements. Applying the `gap` property ensures clean, even spacing between all children (text, input, and links) without needing to apply manual margins to each element.
 
 #### Styles (`Input.css` and `Login.css`)
 
@@ -204,28 +204,28 @@ export default function Counter() {
 
 **Pattern:** keep the items in state, then `map` them to components inside JSX.
 
-```
-const [listi, setList] = useState([]);   // array of tasks
+```jsx
+const [listi, setList] = useState([]); // array of tasks
 
 <ul>
   {listi.map((task, index) => (
     <TaskItem key={index} task={task} />
   ))}
-</ul>
+</ul>;
 ```
 
-* To add an item, never mutate the array — create a new one: `setList([...listi, task])`. React only re-renders when it gets a new array reference.
-* The input has its own `task` state ("controlled input" via `value` + `onChange`); the button click moves it into the list and clears it.
+- To add an item, never mutate the array — create a new one: `setList([...listi, task])`. React only re-renders when it gets a new array reference.
+- The input has its own `task` state ("controlled input" via `value` + `onChange`); the button click moves it into the list and clears it.
 
 #### extracting TaskItem
 
 **component extraction with props**:
 
-```
+```jsx
 export default function TaskItem({ task }) {
   return <li>{task}</li>;
 }
 ```
 
-* Props arrive as **one object**, so you destructure: `({ task })`, not `(index, task)`.
-* The parent (`Home`) owns the state; `TaskItem` is a "dumb" presentational component that just receives data. This makes it easy to later add a checkbox/delete button in one place, styled by its own TaskItem.css.
+- Props arrive as **one object**, so you destructure: `({ task })`, not `(index, task)`.
+- The parent (`Home`) owns the state; `TaskItem` is a "dumb" presentational component that just receives data. This makes it easy to later add a checkbox/delete button in one place, styled by its own TaskItem.css.
