@@ -1,4 +1,6 @@
-# React routing
+# todoReact
+
+## React routing
 
 install the library with the command:
 
@@ -60,13 +62,13 @@ function handleOnClick(e) {
 <Button onClick={handleOnClick} text="Log In" />
 ```
 
-# Input Component
+## Input Component
 
-## Part 1: Creating and Using the Component
+### Part 1: Creating and Using the Component
 
 A strong reusable component accepts standard properties (props). By destructuring specific props like `placeholder`, `value`, and `onChange`, we control the core behavior. Adding the rest operator (`...props`) ensures that any standard HTML attributes passed from the parent (like `required`, `disabled`, or `id`) are automatically forwarded to the native input element - but not very readable.
 
-### 1. The Reusable Component (`Input.jsx`)
+#### 1. The Reusable Component (`Input.jsx`)
 
 ```jsx
 import "./Input.css";
@@ -86,13 +88,13 @@ export default function Input({ placeholder, value, onChange, type = "text" }) {
 }
 ```
 
-### 2. Managing State in the Parent (`Login.jsx`)
+#### 2. Managing State in the Parent (`Login.jsx`)
 
 To make the input functional, the parent component must store the data and provide a way to update it.
 
-- **useState**: Initializes a state variable (`email`) and a function to update it (`setEmail`).
-- **Handler Function**: `handleOnChange` receives the browser event (`e`) and extracts the new text string via `e.target.value`, passing it to `setEmail`.
-- **Binding**: The state and the handler are passed into our custom `<Input/>` component via props.
+* **useState**: Initializes a state variable (`email`) and a function to update it (`setEmail`).
+* **Handler Function**: `handleOnChange` receives the browser event (`e`) and extracts the new text string via `e.target.value`, passing it to `setEmail`.
+* **Binding**: The state and the handler are passed into our custom `<Input/>` component via props.
 
 ```jsx
 import { useState } from "react";
@@ -122,14 +124,14 @@ export default function Login() {
 }
 ```
 
-## Part 2: Component Layout and Styling
+### Part 2: Component Layout and Styling
 
 When styling components, it is best practice to handle inner element sizing on the component itself, while handling the layout and spacing in the parent container.
 
-- **The Input**: Avoid using `display: flex` directly on an HTML `<input>`. Instead, use standard box model properties like `padding`, `width: 100%`, and `box-sizing: border-box`. This guarantees the input fills its space reliably.
-- **The Container**: The parent wrapper uses Flexbox to align elements. Applying the `gap` property ensures clean, even spacing between all children (text, input, and links) without needing to apply manual margins to each element.
+* **The Input**: Avoid using `display: flex` directly on an HTML `<input>`. Instead, use standard box model properties like `padding`, `width: 100%`, and `box-sizing: border-box`. This guarantees the input fills its space reliably.
+* **The Container**: The parent wrapper uses Flexbox to align elements. Applying the `gap` property ensures clean, even spacing between all children (text, input, and links) without needing to apply manual margins to each element.
 
-### Styles (`Input.css` and `Login.css`)
+#### Styles (`Input.css` and `Login.css`)
 
 ```css
 .input {
@@ -154,20 +156,20 @@ and in login.css:
 }
 ```
 
-# useState
+## useState
 
-## What is `useState`?
+### What is `useState`?
 
 `useState` is a React Hook that allows you to store and track data (state) inside a functional component. When this data changes, React automatically re-renders the component to show the updated information on the screen.
 
-## How it works
+### How it works
 
 When you call `useState`, it returns an array containing two items, which you extract using destructuring:
 
 1. **The current state value** (to display or use in your logic).
 2. **A setter function** (to update the value).
 
-## Code Example
+### Code Example
 
 important note - **Use the setter:** Never change the state variable directly (e.g., `count = 1` is bad). Always use the updater function (e.g., `setCount(1)`) so React knows to update the screen
 
@@ -197,3 +199,33 @@ export default function Counter() {
   );
 }
 ```
+
+### Rendering a list in React
+
+**Pattern:** keep the items in state, then `map` them to components inside JSX.
+
+```
+const [listi, setList] = useState([]);   // array of tasks
+
+<ul>
+  {listi.map((task, index) => (
+    <TaskItem key={index} task={task} />
+  ))}
+</ul>
+```
+
+* To add an item, never mutate the array — create a new one: `setList([...listi, task])`. React only re-renders when it gets a new array reference.
+* The input has its own `task` state ("controlled input" via `value` + `onChange`); the button click moves it into the list and clears it.
+
+#### extracting TaskItem
+
+**component extraction with props**:
+
+```
+export default function TaskItem({ task }) {
+  return <li>{task}</li>;
+}
+```
+
+* Props arrive as **one object**, so you destructure: `({ task })`, not `(index, task)`.
+* The parent (`Home`) owns the state; `TaskItem` is a "dumb" presentational component that just receives data. This makes it easy to later add a checkbox/delete button in one place, styled by its own TaskItem.css.
