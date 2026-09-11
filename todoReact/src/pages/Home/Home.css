@@ -1,6 +1,21 @@
 .input-area {
   display: flex;
-  flex-direction: row;
   justify-content: center;
   gap: 10px;
+  width: 270px;
+}
+.list {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+  width: 270px;
+  padding: 0;
+  margin: 10px 0;
+}
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }

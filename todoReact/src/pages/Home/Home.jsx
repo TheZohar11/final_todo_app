@@ -13,8 +13,11 @@ export default function Home() {
     setList([...listi, task]);
     setTask("");
   }
+  function handleDelete(index) {
+    //to be continued
+  }
   return (
-    <>
+    <div className="container">
       <p>Home is whenever Im with you</p>
       <div className="input-area">
         <Input
@@ -24,12 +27,16 @@ export default function Home() {
         />
         <Button text="add" onClick={handleOnClick} />
       </div>
-      <ul>
+      <ul className="list">
         {listi.map((task, index) => (
-          <TaskItem key={index} task={task} />
+          <TaskItem
+            key={index}
+            task={task}
+            onDelete={() => handleDelete(index)}
+          />
         ))}
       </ul>
       <Link to="/Login">Login</Link>
-    </>
+    </div>
   );
 }
