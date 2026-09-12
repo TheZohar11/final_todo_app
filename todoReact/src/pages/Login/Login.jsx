@@ -9,6 +9,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   function handleOnChangeEmail(e) {
     setEmail(e.target.value);
@@ -16,8 +17,23 @@ export default function Login() {
   function handleOnChangePassword(e) {
     setPassword(e.target.value);
   }
-  function handleOnClick(e) {
-    navigate("/Home");
+  async function handleOnClick(e) {
+    try {
+      const response = await fetch("http://localhost:5000/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error);
+        return;
+      }
+      localStorage.setItem("authToken", data.token);
+      navigate("/Home");
+    } catch (e) {
+      setError("could not reach the server");
+    }
   }
   return (
     <div className="divi">
@@ -37,6 +53,7 @@ export default function Login() {
         type="password"
       />
       <Button onClick={handleOnClick} text="Log In" />
+      {error && <p>{error}</p>}
     </div>
   );
 }
