@@ -8,7 +8,7 @@ This document describes the remaining tasks required to complete the basic todo 
 | -------------------------- | --------------------------------------------------------- |
 | Server (Express + MongoDB) | All endpoints implemented and running                     |
 | Register page              | Done — POST `/users`, token stored, navigation on success |
-| Login page                 | UI only — no HTTP call                                    |
+| Login page                 | Done — POST `/users/login`, token stored, link to Register |
 | Home page                  | Local state only — not connected to the server            |
 | Route protection / logout  | Not implemented                                           |
 
@@ -31,14 +31,14 @@ All error responses have the shape `{ error: string }` with an appropriate 4xx/5
 
 ## Tasks
 
-### 1. Login page — connect to server
+### 1. Login page — connect to server ✅ DONE
 
 **File:** `src/pages/Login/Login.jsx`
 
-- Mirror the Register implementation: on button click, POST to `/users/login` with `{ email, password }`.
-- Parse the response with `await response.json()`; on `!response.ok` show `data.error` via an `error` state.
-- On success: `localStorage.setItem("authToken", data.token)` and `navigate("/Home")`.
-- Add a `<Link to="/Register">` for users without an account.
+- ~~Mirror the Register implementation: on button click, POST to `/users/login` with `{ email, password }`.~~ Done.
+- ~~Parse the response with `await response.json()`; on `!response.ok` show `data.error` via an `error` state.~~ Done (also clears stale errors before each attempt).
+- ~~On success: `localStorage.setItem("authToken", data.token)` and `navigate("/Home")`.~~ Done.
+- ~~Add a `<Link to="/Register">` for users without an account.~~ Done (styled with `.register-link`).
 
 ### 2. Home page — load tasks from server
 
@@ -111,9 +111,9 @@ All error responses have the shape `{ error: string }` with an appropriate 4xx/5
 
 ## Suggested Order
 
-1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10
+~~1~~ → **2 (next)** → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10
 
-Tasks 1–2 unblock everything else; 3–5 complete the core loop; 6–10 wrap up.
+Task 1 is done; 2 unblocks everything else; 3–5 complete the core loop; 6–10 wrap up.
 
 ## Definition of Done
 

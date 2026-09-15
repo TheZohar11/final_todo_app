@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Input from "../../components/Input/Input";
 import TextLarge from "../../components/TextLarge/TextLarge";
 import "./Login.css";
@@ -19,6 +19,7 @@ export default function Login() {
   }
   async function handleOnClick(e) {
     try {
+      setError("");
       const response = await fetch("http://localhost:5000/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -54,6 +55,9 @@ export default function Login() {
       />
       <Button onClick={handleOnClick} text="Log In" />
       {error && <p>{error}</p>}
+      <Link className="register-link" to="/Register">
+        Don't have an account? Register
+      </Link>
     </div>
   );
 }
