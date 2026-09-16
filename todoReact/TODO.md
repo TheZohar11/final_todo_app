@@ -48,7 +48,7 @@ All error responses have the shape `{ error: string }` with an appropriate 4xx/5
 - ~~Replace the string-array state with the server's task objects: `{ _id, description, completed }`.~~ Done.
 - ~~Update rendering accordingly: `key={task._id}`, display `task.description`.~~ Done.
 
-See "Fetching Data on Mount" in [README.md](./README.md) for the full pattern.
+See [Working with Server Data](./docs/05-server-data.md) for the full pattern.
 
 ### 3. Add task — persist to server ✅ DONE
 
@@ -58,7 +58,7 @@ See "Fetching Data on Mount" in [README.md](./README.md) for the full pattern.
 - ~~On success, either re-fetch the list or append the created task to state (the response contains `taskId`).~~ Done (appends `{ _id: data.taskId, description: task, completed: false }`).
 - ~~Keep the existing guard against empty input.~~ Done (`if (!task.trim()) return;`).
 
-See "Creating Data — POST a New Task" in [README.md](./README.md) for the full pattern.
+See [Working with Server Data](./docs/05-server-data.md) for the full pattern.
 
 ### 4. Delete task — persist to server
 

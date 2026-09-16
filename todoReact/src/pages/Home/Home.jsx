@@ -74,6 +74,24 @@ export default function Home() {
       setError("could not reach server");
     }
   }
+  async function handleUpdate(taskId) {
+    try {
+      const response = await fetch(`http://localhost:5000/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error);
+        return;
+      }
+      setList(listi.map((t) => (t._id === taskId ? data.task : t)));
+    } catch (e) {
+      setError("could not reach server");
+    }
+  }
   return (
     <div className="container">
       <p>Home is whenever Im with you</p>
@@ -86,13 +104,17 @@ export default function Home() {
         <Button text="add" onClick={handleOnClick} />
       </div>
       <ul className="list">
-        {listi.map((task) => (
-          <TaskItem
-            key={task._id}
-            task={task.description}
-            onDelete={() => handleDelete(task._id)}
-          />
-        ))}
+        {[...listi]
+          .sort((a, b) => a.completed - b.completed)
+          .map((task) => (
+            <TaskItem
+              key={task._id}
+              task={task.description}
+              onDelete={() => handleDelete(task._id)}
+              onUpdate={() => handleUpdate(task._id)}
+              completed={task.completed}
+            />
+          ))}
       </ul>
       {error && <p>{error}</p>}
     </div>
