@@ -56,8 +56,23 @@ export default function Home() {
       setError("could not reach the server");
     }
   }
-  function handleDelete(taskId) {
-    //to be continued
+  async function handleDelete(taskId) {
+    try {
+      const response = await fetch(`http://localhost:5000/tasks/${taskId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error);
+        return;
+      }
+      setList(listi.filter((t) => t._id !== taskId));
+    } catch (e) {
+      setError("could not reach server");
+    }
   }
   return (
     <div className="container">
