@@ -4,13 +4,13 @@ This document describes the remaining tasks required to complete the basic todo 
 
 ## Current State
 
-| Area                       | Status                                                    |
-| -------------------------- | --------------------------------------------------------- |
-| Server (Express + MongoDB) | All endpoints implemented and running                     |
-| Register page              | Done — POST `/users`, token stored, navigation on success |
+| Area                       | Status                                                     |
+| -------------------------- | ---------------------------------------------------------- |
+| Server (Express + MongoDB) | All endpoints implemented and running                      |
+| Register page              | Done — POST `/users`, token stored, navigation on success  |
 | Login page                 | Done — POST `/users/login`, token stored, link to Register |
-| Home page                  | Local state only — not connected to the server            |
-| Route protection / logout  | Not implemented                                           |
+| Home page                  | Load + add done — delete and toggle still local/stubbed    |
+| Route protection / logout  | Not implemented                                            |
 
 **Token convention:** the token is stored in `localStorage` under the key `authToken`. Protected endpoints expect the header `Authorization: Bearer <token>`.
 
@@ -40,26 +40,25 @@ All error responses have the shape `{ error: string }` with an appropriate 4xx/5
 - ~~On success: `localStorage.setItem("authToken", data.token)` and `navigate("/Home")`.~~ Done.
 - ~~Add a `<Link to="/Register">` for users without an account.~~ Done (styled with `.register-link`).
 
-### 2. Home page — load tasks from server
+### 2. Home page — load tasks from server ✅ DONE
 
 **File:** `src/pages/Home/Home.jsx`
 
-- On mount (`useEffect` with `[]` deps), GET `/tasks` with the auth header:
-  ```js
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("authToken")}`;
-  }
-  ```
-- Replace the string-array state with the server's task objects: `{ _id, description, completed }`.
-- Update rendering accordingly: `key={task._id}`, display `task.description`.
+- ~~On mount (`useEffect` with `[]` deps), GET `/tasks` with the auth header.~~ Done.
+- ~~Replace the string-array state with the server's task objects: `{ _id, description, completed }`.~~ Done.
+- ~~Update rendering accordingly: `key={task._id}`, display `task.description`.~~ Done.
 
-### 3. Add task — persist to server
+See "Fetching Data on Mount" in [README.md](./README.md) for the full pattern.
+
+### 3. Add task — persist to server ✅ DONE
 
 **File:** `src/pages/Home/Home.jsx`
 
-- On add click, POST `/tasks` with body `{ description: task }` and the auth header.
-- On success, either re-fetch the list or append the created task to state (the response contains `taskId`).
-- Keep the existing guard against empty input.
+- ~~On add click, POST `/tasks` with body `{ description: task }` and the auth header.~~ Done.
+- ~~On success, either re-fetch the list or append the created task to state (the response contains `taskId`).~~ Done (appends `{ _id: data.taskId, description: task, completed: false }`).
+- ~~Keep the existing guard against empty input.~~ Done (`if (!task.trim()) return;`).
+
+See "Creating Data — POST a New Task" in [README.md](./README.md) for the full pattern.
 
 ### 4. Delete task — persist to server
 
@@ -111,9 +110,9 @@ All error responses have the shape `{ error: string }` with an appropriate 4xx/5
 
 ## Suggested Order
 
-~~1~~ → **2 (next)** → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10
+~~1~~ → ~~2~~ → ~~3~~ → **4 (next)** → 5 → 6 → 7 → 8 → 9 → 10
 
-Task 1 is done; 2 unblocks everything else; 3–5 complete the core loop; 6–10 wrap up.
+Tasks 1–3 are done; 4–5 complete the core loop; 6–10 wrap up.
 
 ## Definition of Done
 

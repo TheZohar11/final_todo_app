@@ -31,11 +31,32 @@ export default function Home() {
     getTasks();
   }, []);
 
-  function handleOnClick() {
-    setList([...listi, task]);
-    setTask("");
+  async function handleOnClick() {
+    try {
+      if (!task.trim()) return;
+      const response = await fetch("http://localhost:5000/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify({ description: task }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error);
+        return;
+      }
+      setList([
+        ...listi,
+        { _id: data.taskId, description: task, completed: false },
+      ]);
+      setTask("");
+    } catch (e) {
+      setError("could not reach the server");
+    }
   }
-  function handleDelete(index) {
+  function handleDelete(taskId) {
     //to be continued
   }
   return (
@@ -54,7 +75,7 @@ export default function Home() {
           <TaskItem
             key={task._id}
             task={task.description}
-            onDelete={() => handleDelete(index)}
+            onDelete={() => handleDelete(task._id)}
           />
         ))}
       </ul>
