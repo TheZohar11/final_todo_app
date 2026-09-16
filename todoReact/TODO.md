@@ -60,14 +60,14 @@ See [Working with Server Data](./docs/05-server-data.md) for the full pattern.
 
 See [Working with Server Data](./docs/05-server-data.md) for the full pattern.
 
-### 4. Delete task — persist to server
+### 4. Delete task — persist to server ✅ DONE
 
 **Files:** `src/pages/Home/Home.jsx`, `src/components/TaskItem/TaskItem.jsx`
 
 - Change `handleDelete` to call DELETE `/tasks/:id` (auth header required), passing the task's `_id` instead of the array index.
 - On success, remove the task from state with `filter`.
 
-### 5. Toggle completed — persist to server
+### 5. Toggle completed — persist to server ✅ DONE
 
 **Files:** `src/pages/Home/Home.jsx`, `src/components/TaskItem/TaskItem.jsx`
 
