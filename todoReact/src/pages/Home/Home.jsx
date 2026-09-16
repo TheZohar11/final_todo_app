@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
@@ -8,6 +8,28 @@ import "./Home.css";
 export default function Home() {
   const [listi, setList] = useState([]);
   const [task, setTask] = useState("");
+  const [error, setError] = useState("");
+  useEffect(() => {
+    async function getTasks() {
+      try {
+        const response = await fetch("http://localhost:5000/tasks", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setError(data.error);
+          return;
+        }
+        setList(data);
+      } catch (e) {
+        setError("could not reach the server");
+      }
+    }
+    getTasks();
+  }, []);
 
   function handleOnClick() {
     setList([...listi, task]);
@@ -28,15 +50,15 @@ export default function Home() {
         <Button text="add" onClick={handleOnClick} />
       </div>
       <ul className="list">
-        {listi.map((task, index) => (
+        {listi.map((task) => (
           <TaskItem
-            key={index}
-            task={task}
+            key={task._id}
+            task={task.description}
             onDelete={() => handleDelete(index)}
           />
         ))}
       </ul>
-      <Link to="/Login">Login</Link>
+      {error && <p>{error}</p>}
     </div>
   );
 }
