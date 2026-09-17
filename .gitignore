@@ -1,2 +1,23 @@
-.env
+# dependencies
 node_modules/
+
+# build outputs
+dist/
+build/
+
+# environment files with secrets (server .env holds MONGODB_URI)
+.env
+.env.local
+.env*.local
+# note: todoReact/.env.production is committed on purpose - it only holds the public API URL
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
