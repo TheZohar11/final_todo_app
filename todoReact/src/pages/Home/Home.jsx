@@ -5,6 +5,7 @@ import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 import TaskItem from "../../components/TaskItem/TaskItem";
 import { API_URL } from "../../config";
+import refreshAccessToken from "../../functions/refreshAccessToken";
 import "./Home.css";
 
 export default function Home() {
@@ -13,26 +14,56 @@ export default function Home() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  async function authFetch(url, options = {}) {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      localStorage.removeItem("refreshToken");
+      navigate("/Login");
+      return null;
+    }
+
+    let response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (response.status === 401) {
+      const refreshed = await refreshAccessToken();
+      if (!refreshed) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        navigate("/Login");
+        return null;
+      }
+
+      response = await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+    }
+
+    return response;
+  }
+
   useEffect(() => {
     async function getTasks() {
-      if (!localStorage.getItem("authToken")) {
+      if (!localStorage.getItem("accessToken")) {
         navigate("/Login");
         return;
       }
       setLoading(true);
       try {
-        const response = await fetch(`${API_URL}/tasks`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        });
+        const response = await authFetch(`${API_URL}/tasks`, { method: "GET" });
+        if (!response) return;
+
         const data = await response.json();
-        if (response.status === 401) {
-          localStorage.removeItem("authToken");
-          navigate("/Login");
-          return;
-        }
         if (!response.ok) {
           setError(data.error);
           return;
@@ -50,14 +81,13 @@ export default function Home() {
   async function handleOnClick() {
     try {
       if (!task.trim()) return;
-      const response = await fetch(`${API_URL}/tasks`, {
+      const response = await authFetch(`${API_URL}/tasks`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: task }),
       });
+      if (!response) return;
+
       const data = await response.json();
       if (!response.ok) {
         setError(data.error);
@@ -74,12 +104,11 @@ export default function Home() {
   }
   async function handleDelete(taskId) {
     try {
-      const response = await fetch(`${API_URL}/tasks/${taskId}`, {
+      const response = await authFetch(`${API_URL}/tasks/${taskId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
       });
+      if (!response) return;
+
       const data = await response.json();
       if (!response.ok) {
         setError(data.error);
@@ -92,12 +121,11 @@ export default function Home() {
   }
   async function handleUpdate(taskId) {
     try {
-      const response = await fetch(`${API_URL}/tasks/${taskId}`, {
+      const response = await authFetch(`${API_URL}/tasks/${taskId}`, {
         method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
       });
+      if (!response) return;
+
       const data = await response.json();
       if (!response.ok) {
         setError(data.error);
@@ -136,7 +164,8 @@ export default function Home() {
       <Button
         text="logout"
         onClick={() => {
-          localStorage.removeItem("authToken");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
           navigate("/Landing");
         }}
       />

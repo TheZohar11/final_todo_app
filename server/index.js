@@ -2,9 +2,13 @@ require("dotenv").config();
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
 const { MongoClient, ObjectId } = require("mongodb");
 const app = express();
+
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "dev-refresh-secret";
 
 const cors = require("cors");
 const { getTokenFromHeader } = require("./Logic/getTokenFromHeader");
@@ -31,6 +35,28 @@ async function connectDB() {
   console.log("connected to mongo");
 }
 
+function createTokens(user) {
+  const accessToken = jwt.sign({ userId: user.ID, email: user.email }, JWT_SECRET, {
+    expiresIn: "15m",
+  });
+  const refreshToken = jwt.sign({ userId: user.ID }, JWT_REFRESH_SECRET, {
+    expiresIn: "7d",
+  });
+  return { accessToken, refreshToken };
+}
+
+async function getAuthUser(req) {
+  const token = getTokenFromHeader(req);
+  if (!token) return null;
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    return await usersCollection.findOne({ ID: decoded.userId });
+  } catch (e) {
+    return null;
+  }
+}
+
 try {
   connectDB();
 } catch (e) {
@@ -51,15 +77,12 @@ app.post("/users/login", async (req, res) => {
   try {
     const user = await usersCollection.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
-      let token = user.token;
-      if (!token) {
-        token = uuidv4();
-        await usersCollection.updateOne({ email }, { $set: { token } });
-      }
+      const { accessToken, refreshToken } = createTokens(user);
       res.status(200).json({
         message: "login successfully",
         userId: user.ID,
-        token: token,
+        accessToken,
+        refreshToken,
       });
     } else {
       res.status(401).json({ error: "invalid email or password" });
@@ -106,24 +129,42 @@ app.post("/users", async (req, res) => {
     if (!result) {
       res.status(400);
     }
+    const { accessToken, refreshToken } = createTokens(userObj);
     res.status(201).json({
       message: "created a new user",
       userId: result.insertedId,
-      token: userObj.token,
+      accessToken,
+      refreshToken,
     });
   } catch (e) {
     res.status(500).json({ error: "error creating the user" });
   }
 });
 
+app.post("/users/refresh", async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ error: "Refresh token required" });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
+    const user = await usersCollection.findOne({ ID: decoded.userId });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+    const { accessToken } = createTokens(user);
+    return res.status(200).json({ accessToken });
+  } catch (e) {
+    return res.status(401).json({ error: "Invalid refresh token" });
+  }
+});
+
 //creating a task
 app.post("/tasks", async (req, res) => {
   const { description, completed } = req.body;
-  const token = getTokenFromHeader(req);
-
-  if (!token) {
-    return res.status(401).json({ error: "Authorization token required" });
-  }
 
   // Validate required fields
   if (!description) {
@@ -131,8 +172,7 @@ app.post("/tasks", async (req, res) => {
   }
 
   try {
-    // Get user by token
-    const user = await usersCollection.findOne({ token });
+    const user = await getAuthUser(req);
     if (!user) {
       return res.status(401).json({ error: "Invalid token" });
     }
@@ -156,13 +196,7 @@ app.post("/tasks", async (req, res) => {
 // reading all tasks for a specific user (get home data)
 app.get("/tasks", async (req, res) => {
   try {
-    const userToken = getTokenFromHeader(req);
-
-    if (!userToken) {
-      return res.status(401).json({ error: "Authorization token required" });
-    }
-
-    const user = await usersCollection.findOne({ token: userToken });
+    const user = await getAuthUser(req);
     if (!user) {
       return res.status(401).json({ error: "Invalid token" });
     }
@@ -176,16 +210,8 @@ app.get("/tasks", async (req, res) => {
 
 //updating a task
 app.patch("/tasks/:id", async (req, res) => {
-  // Get token from Authorization header
-  const token = getTokenFromHeader(req);
-
-  if (!token) {
-    return res.status(401).json({ error: "Authorization token required" });
-  }
-
   try {
-    // Verify user by token
-    const user = await usersCollection.findOne({ token });
+    const user = await getAuthUser(req);
     if (!user) {
       return res.status(401).json({ error: "Invalid token" });
     }
@@ -222,11 +248,7 @@ app.patch("/tasks/:id", async (req, res) => {
 //deleting a task (temporary- not completed yet)
 app.delete("/tasks/:id", async (req, res) => {
   try {
-    const token = getTokenFromHeader(req);
-    if (!token) {
-      return res.status(401).json({ error: "Authorization token required" });
-    }
-    const user = await usersCollection.findOne({ token });
+    const user = await getAuthUser(req);
     if (!user) {
       return res.status(401).json({ error: "Invalid token" });
     }

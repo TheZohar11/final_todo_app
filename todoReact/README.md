@@ -16,6 +16,7 @@ A React todo app (Vite) working against the Express/MongoDB server. The docs are
 10. [Configuration](./docs/10-configuration.md) — `config.js`, `VITE_API_URL`, dev vs production
 11. [UX States and Spinner](./docs/11-ux-states-and-spinner.md) — loading/error states, react-spinners
 12. [App Architecture](./docs/12-app-architecture.md) — the whole picture: routes, pages, components, tech stack
+13. [JWT Authentication and Refresh Tokens](./docs/13-jwt-authentication.md) — access token + refresh token flow in the browser app
 
 The server has its own docs under [server/docs/](../server/docs/).
 

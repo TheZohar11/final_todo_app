@@ -31,7 +31,8 @@ export default function Login() {
         setError(data.error);
         return;
       }
-      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
       navigate("/Home");
     } catch (e) {
       setError("could not reach the server");
