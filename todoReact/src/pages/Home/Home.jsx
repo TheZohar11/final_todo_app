@@ -163,7 +163,16 @@ export default function Home() {
       <ClipLoader loading={loading} size={150} color="#ffecec" />
       <Button
         text="logout"
-        onClick={() => {
+        onClick={async () => {
+          const accessToken = localStorage.getItem("accessToken");
+          if (accessToken) {
+            await fetch(`${API_URL}/users/logout`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }).catch(() => {});
+          }
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
           navigate("/Landing");

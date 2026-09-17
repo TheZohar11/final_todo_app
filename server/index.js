@@ -1,4 +1,5 @@
 require("dotenv").config();
+const crypto = require("crypto");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
@@ -8,7 +9,8 @@ const { MongoClient, ObjectId } = require("mongodb");
 const app = express();
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "dev-refresh-secret";
+const JWT_REFRESH_SECRET =
+  process.env.JWT_REFRESH_SECRET || "dev-refresh-secret";
 
 const cors = require("cors");
 const { getTokenFromHeader } = require("./Logic/getTokenFromHeader");
@@ -35,10 +37,18 @@ async function connectDB() {
   console.log("connected to mongo");
 }
 
+function hashToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
 function createTokens(user) {
-  const accessToken = jwt.sign({ userId: user.ID, email: user.email }, JWT_SECRET, {
-    expiresIn: "15m",
-  });
+  const accessToken = jwt.sign(
+    { userId: user.ID, email: user.email },
+    JWT_SECRET,
+    {
+      expiresIn: "15m",
+    },
+  );
   const refreshToken = jwt.sign({ userId: user.ID }, JWT_REFRESH_SECRET, {
     expiresIn: "7d",
   });
@@ -78,6 +88,10 @@ app.post("/users/login", async (req, res) => {
     const user = await usersCollection.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
       const { accessToken, refreshToken } = createTokens(user);
+      await usersCollection.updateOne(
+        { _id: user._id },
+        { $set: { refreshTokenHash: hashToken(refreshToken) } },
+      );
       res.status(200).json({
         message: "login successfully",
         userId: user.ID,
@@ -119,6 +133,7 @@ app.post("/users", async (req, res) => {
       ID: count,
       uuid: uuidv4(),
       token: uuidv4(),
+      refreshTokenHash: "",
     };
     const result = await usersCollection.insertOne(userObj);
     await countersCollection.updateOne(
@@ -130,6 +145,10 @@ app.post("/users", async (req, res) => {
       res.status(400);
     }
     const { accessToken, refreshToken } = createTokens(userObj);
+    await usersCollection.updateOne(
+      { _id: result.insertedId },
+      { $set: { refreshTokenHash: hashToken(refreshToken) } },
+    );
     res.status(201).json({
       message: "created a new user",
       userId: result.insertedId,
@@ -151,7 +170,7 @@ app.post("/users/refresh", async (req, res) => {
   try {
     const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
     const user = await usersCollection.findOne({ ID: decoded.userId });
-    if (!user) {
+    if (!user || hashToken(refreshToken) !== user.refreshTokenHash) {
       return res.status(401).json({ error: "Invalid refresh token" });
     }
 
@@ -160,6 +179,20 @@ app.post("/users/refresh", async (req, res) => {
   } catch (e) {
     return res.status(401).json({ error: "Invalid refresh token" });
   }
+});
+
+app.post("/users/logout", async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+
+  await usersCollection.updateOne(
+    { _id: user._id },
+    { $unset: { refreshTokenHash: "" } },
+  );
+
+  return res.status(200).json({ message: "logged out" });
 });
 
 //creating a task
