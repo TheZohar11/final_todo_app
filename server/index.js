@@ -153,16 +153,6 @@ app.post("/tasks", async (req, res) => {
   }
 });
 
-//reading all users (temporary)
-app.get("/users", async (req, res) => {
-  try {
-    const users = await usersCollection.find();
-    res.send(users);
-  } catch (e) {
-    res.status(500).send(e);
-  }
-});
-
 // reading all tasks for a specific user (get home data)
 app.get("/tasks", async (req, res) => {
   try {
@@ -181,18 +171,6 @@ app.get("/tasks", async (req, res) => {
     res.send(tasks);
   } catch (e) {
     res.status(500).send(e);
-  }
-});
-
-//updating a user
-app.patch("/users/:id", async (req, res) => {
-  const updates = Object.keys(req.body);
-  try {
-    const user = await usersCollection.findById(req.params.id);
-    updates.forEach((update) => (user[update] = req.body[update]));
-    await user.save();
-  } catch (e) {
-    res.status(400).send(e);
   }
 });
 

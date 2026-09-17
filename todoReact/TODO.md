@@ -6,11 +6,11 @@ This document describes the remaining tasks required to complete the basic todo 
 
 | Area                       | Status                                                     |
 | -------------------------- | ---------------------------------------------------------- |
-| Server (Express + MongoDB) | All endpoints implemented and running                      |
+| Server (Express + MongoDB) | All endpoints implemented; dev-only routes removed         |
 | Register page              | Done — POST `/users`, token stored, navigation on success  |
 | Login page                 | Done — POST `/users/login`, token stored, link to Register |
-| Home page                  | Load + add done — delete and toggle still local/stubbed    |
-| Route protection / logout  | Not implemented                                            |
+| Home page                  | Done — full CRUD, route protection, logout, loading/error  |
+| Route protection / logout  | Done                                                       |
 
 **Token convention:** the token is stored in `localStorage` under the key `authToken`. Protected endpoints expect the header `Authorization: Bearer <token>`.
 
@@ -75,44 +75,42 @@ See [Working with Server Data](./docs/05-server-data.md) for the full pattern.
 - On success, update the task in state with the returned `task` object.
 - Style completed tasks (e.g. `text-decoration: line-through` when `task.completed` is true).
 
-### 6. Route protection
-
-**File:** `src/pages/Home/Home.jsx` (or a small wrapper component)
-
-- If `localStorage.getItem("authToken")` is missing, redirect to `/Login` (`useEffect` + `navigate`).
-- Additionally, if any server call returns `401`, clear the token and redirect to `/Login` (token may be stale).
-
-### 7. Logout
+### 6. Route protection ✅ DONE
 
 **File:** `src/pages/Home/Home.jsx`
 
-- Add a logout button: `localStorage.removeItem("authToken")`, then `navigate("/Login")`.
+- ~~If `localStorage.getItem("authToken")` is missing, redirect to `/Login` (`useEffect` + `navigate`).~~ Done (checked before fetching).
+- ~~Additionally, if any server call returns `401`, clear the token and redirect to `/Login` (token may be stale).~~ Done (in `getTasks`).
 
-### 8. Configuration cleanup
-
-**New file:** `src/config.js`
-
-- Export the base URL once (`export const API_URL = "http://localhost:5000";`) and use it in every fetch instead of hardcoded strings.
-
-### 9. UX states (recommended)
+### 7. Logout ✅ DONE
 
 **File:** `src/pages/Home/Home.jsx`
 
-- `loading` state while fetching tasks ("loading…" message).
-- `error` state for failed requests (same pattern as Register).
+- ~~Add a logout button: `localStorage.removeItem("authToken")`, then navigate.~~ Done (navigates to `/Landing` by design).
 
-### 10. Server cleanup
+### 8. Configuration cleanup ✅ DONE
+
+**File:** `src/config.js`
+
+- ~~Export the base URL once and use it in every fetch instead of hardcoded strings.~~ Done — `API_URL` reads `VITE_API_URL` (set on Render in production) and falls back to `http://localhost:5000` locally.
+
+### 9. UX states ✅ DONE
+
+**File:** `src/pages/Home/Home.jsx`
+
+- ~~`loading` state while fetching tasks.~~ Done (`ClipLoader` from react-spinners, `finally` clears it).
+- ~~`error` state for failed requests.~~ Done.
+
+### 10. Server cleanup ✅ DONE
 
 **File:** `server/index.js`
 
-- `PATCH /users/:id` uses Mongoose syntax (`findById`, `.save()`) that will crash with the native MongoDB driver — remove the route or rewrite it with `updateOne`. It also lacks auth and never sends a success response.
-- `GET /users` returns all users including password hashes and tokens — remove it or restrict it before any deployment (development-only as-is).
+- ~~Remove the broken `PATCH /users/:id` route (Mongoose syntax).~~ Removed.
+- ~~Remove `GET /users` (returned password hashes and tokens).~~ Removed.
 
 ## Suggested Order
 
-~~1~~ → ~~2~~ → ~~3~~ → **4 (next)** → 5 → 6 → 7 → 8 → 9 → 10
-
-Tasks 1–3 are done; 4–5 complete the core loop; 6–10 wrap up.
+All tasks 1–10 are done. 🎉 Optional next: a mobile/responsive UX pass (touch targets, input widths, ≥16px fonts).
 
 ## Definition of Done
 

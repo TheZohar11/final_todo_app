@@ -1,24 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { ClipLoader } from "react-spinners";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 import TaskItem from "../../components/TaskItem/TaskItem";
+import { API_URL } from "../../config";
 import "./Home.css";
 
 export default function Home() {
   const [listi, setList] = useState([]);
   const [task, setTask] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   useEffect(() => {
     async function getTasks() {
+      if (!localStorage.getItem("authToken")) {
+        navigate("/Login");
+        return;
+      }
+      setLoading(true);
       try {
-        const response = await fetch("http://localhost:5000/tasks", {
+        const response = await fetch(`${API_URL}/tasks`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         });
         const data = await response.json();
+        if (response.status === 401) {
+          localStorage.removeItem("authToken");
+          navigate("/Login");
+          return;
+        }
         if (!response.ok) {
           setError(data.error);
           return;
@@ -26,6 +40,8 @@ export default function Home() {
         setList(data);
       } catch (e) {
         setError("could not reach the server");
+      } finally {
+        setLoading(false);
       }
     }
     getTasks();
@@ -34,7 +50,7 @@ export default function Home() {
   async function handleOnClick() {
     try {
       if (!task.trim()) return;
-      const response = await fetch("http://localhost:5000/tasks", {
+      const response = await fetch(`${API_URL}/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +74,7 @@ export default function Home() {
   }
   async function handleDelete(taskId) {
     try {
-      const response = await fetch(`http://localhost:5000/tasks/${taskId}`, {
+      const response = await fetch(`${API_URL}/tasks/${taskId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -76,7 +92,7 @@ export default function Home() {
   }
   async function handleUpdate(taskId) {
     try {
-      const response = await fetch(`http://localhost:5000/tasks/${taskId}`, {
+      const response = await fetch(`${API_URL}/tasks/${taskId}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -116,6 +132,14 @@ export default function Home() {
             />
           ))}
       </ul>
+      <ClipLoader loading={loading} size={150} color="#ffecec" />
+      <Button
+        text="logout"
+        onClick={() => {
+          localStorage.removeItem("authToken");
+          navigate("/Landing");
+        }}
+      />
       {error && <p>{error}</p>}
     </div>
   );

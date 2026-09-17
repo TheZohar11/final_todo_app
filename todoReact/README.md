@@ -12,5 +12,11 @@ A React todo app (Vite) working against the Express/MongoDB server. The docs are
 6. [Auth and localStorage](./docs/06-auth-and-localstorage.md) — the token lifecycle, protected requests, route protection
 7. [Updating and Deleting Data](./docs/07-update-and-delete.md) — PATCH/DELETE with ids in the URL, map/filter state updates, sorting
 8. [Icons and Conditional Rendering](./docs/08-icons-and-conditional-rendering.md) — react-icons, toggling icons with a ternary
+9. [Route Protection and Logout](./docs/09-route-protection-and-logout.md) — redirects for missing/stale tokens, logging out
+10. [Configuration](./docs/10-configuration.md) — `config.js`, `VITE_API_URL`, dev vs production
+11. [UX States and Spinner](./docs/11-ux-states-and-spinner.md) — loading/error states, react-spinners
+12. [App Architecture](./docs/12-app-architecture.md) — the whole picture: routes, pages, components, tech stack
+
+The server has its own docs under [server/docs/](../server/docs/).
 
 For what's left to build, see [TODO.md](./TODO.md).

@@ -4,6 +4,7 @@ import Input from "../../components/Input/Input";
 import TextLarge from "../../components/TextLarge/TextLarge";
 import "./Login.css";
 import Button from "../../components/Button/Button";
+import { API_URL } from "../../config";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function Login() {
   async function handleOnClick(e) {
     try {
       setError("");
-      const response = await fetch("http://localhost:5000/users/login", {
+      const response = await fetch(`${API_URL}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

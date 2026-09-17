@@ -4,6 +4,7 @@ import TextLarge from "../../components/TextLarge/TextLarge";
 import "./Register.css";
 import Button from "../../components/Button/Button";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ export default function Register() {
         setError("password must be equal to verify password");
         return;
       }
-      const response = await fetch("http://localhost:5000/users", {
+      const response = await fetch(`${API_URL}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
