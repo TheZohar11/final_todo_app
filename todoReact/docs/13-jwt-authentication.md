@@ -23,12 +23,24 @@ localStorage.setItem("accessToken", data.accessToken);
 localStorage.setItem("refreshToken", data.refreshToken);
 ```
 
-The logout button clears both:
+The logout button clears both and calls the backend logout endpoint first:
 
 ```js
+const accessToken = localStorage.getItem("accessToken");
+if (accessToken) {
+  await fetch(`${API_URL}/users/logout`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).catch(() => {});
+}
+
 localStorage.removeItem("accessToken");
 localStorage.removeItem("refreshToken");
 ```
+
+This makes the logout flow stronger because the server removes the stored refresh-token hash too.
 
 ## Frontend helper for protected requests
 

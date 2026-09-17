@@ -45,6 +45,35 @@ function createTokens(user) {
 
 The access token is for normal authenticated requests. The refresh token is only used to get a fresh access token when the old one expires.
 
+## Minimal refresh-token protection
+
+To make refresh tokens a little safer without a full session system, the server stores a hash of the refresh token instead of the raw token value.
+
+```js
+function hashToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+```
+
+When a user logs in or registers, the server stores the hash:
+
+```js
+await usersCollection.updateOne(
+  { _id: user._id },
+  { $set: { refreshTokenHash: hashToken(refreshToken) } },
+);
+```
+
+Then when the client calls `/users/refresh`, the server verifies the signature and compares the hash:
+
+```js
+if (!user || hashToken(refreshToken) !== user.refreshTokenHash) {
+  return res.status(401).json({ error: "Invalid refresh token" });
+}
+```
+
+This is a small but meaningful improvement: the database does not store the raw refresh token, but it can still reject stale or revoked values.
+
 ## Login and register responses
 
 Both routes return both tokens:
@@ -95,6 +124,28 @@ app.post("/users/refresh", async (req, res) => {
 ```
 
 The refresh flow should be used only when `401` happens from an expired access token.
+
+## Logout invalidation
+
+The app also exposes a small logout route that clears the stored refresh-token hash from the database.
+
+```js
+app.post("/users/logout", async (req, res) => {
+  const user = await getAuthUser(req);
+  if (!user) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+
+  await usersCollection.updateOne(
+    { _id: user._id },
+    { $unset: { refreshTokenHash: "" } },
+  );
+
+  return res.status(200).json({ message: "logged out" });
+});
+```
+
+This gives the app a minimal server-side invalidation step without a full session-table design.
 
 ## Protected routes
 
